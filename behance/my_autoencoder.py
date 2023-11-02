@@ -75,64 +75,68 @@ class autoencoder(nn.Module):
         for layer in list(ptm):
             if isinstance(layer, nn.Conv2d):
                 print(i, '/', len(th_cfg), ':', th_cfg[i])
-                layer.weight = th.nn.Parameter(thm.get(th_cfg[i]).weight.float())
-                layer.bias = th.nn.Parameter(thm.get(th_cfg[i]).bias.float())
+                layer.weight = nn.Parameter(thm.features[th_cfg[i]].weight.float())
+                layer.bias = nn.Parameter(thm.features[th_cfg[i]].bias.float())
                 i += 1
         print('wct load torch #convs', len(th_cfg), i)
 
-    def load_aux_from_torch(self, ptm, thm, aux_cfg):
-        print(ptm, thm)
-        i = 0
-        for layer in ptm.children():
-            if isinstance(layer, nn.Conv2d):
-                print(i, '/', len(aux_cfg), ':', aux_cfg[i])
+    # def load_aux_from_torch(self, ptm, thm, aux_cfg):
+    #     print(ptm, thm)
+    #     i = 0
+    #     for layer in ptm.children():
+    #         if isinstance(layer, nn.Conv2d):
+    #             print(i, '/', len(aux_cfg), ':', aux_cfg[i])
                 
-                # Access the corresponding layer in the Torch model by name
-                if aux_cfg[i] in thm._modules:
-                    torch_layer = thm._modules[aux_cfg[i]]
+    #             # Access the corresponding layer in the Torch model by name
+    #             if aux_cfg[i] in thm._modules:
+    #                 torch_layer = thm._modules[aux_cfg[i]]
 
-                    if torch_layer is not None:
-                        # Copy weights and biases from the Torch layer to the PyTorch layer
-                        layer.weight = nn.Parameter(torch_layer.weight.float())
-                        layer.bias = nn.Parameter(torch_layer.bias.float())
-                        i += 1
-                    else:
-                        print('Torch layer for', aux_cfg[i], 'not found.')
+    #                 if torch_layer is not None:
+    #                     # Copy weights and biases from the Torch layer to the PyTorch layer
+    #                     layer.weight = nn.Parameter(torch_layer.weight.float())
+    #                     layer.bias = nn.Parameter(torch_layer.bias.float())
+    #                     i += 1
+    #                 else:
+    #                     print('Torch layer for', aux_cfg[i], 'not found.')
 
-        print('wct load torch #convs', len(aux_cfg), i)
+    #     print('wct load torch #convs', len(aux_cfg), i)
 
 
     ## original not working
 
-    # def load_aux_from_torch(self, ptm, thm, th_cfg, aux_cfg):
-    #     #print ptm, thm
-    #     assert(len(th_cfg) < len(aux_cfg))
-    #     i = 0
-    #     while i < len(th_cfg):
-    #         assert(th_cfg[i] == aux_cfg[i])
-    #         i += 1
+    def load_aux_from_torch(self, ptm, thm, th_cfg, aux_cfg):
+        #print ptm, thm
+        assert(len(th_cfg) < len(aux_cfg))
+        i = 0
+        while i < len(th_cfg):
+            assert(th_cfg[i] == aux_cfg[i])
+            i += 1
 
-    #     for layer in list(ptm):
-    #         if isinstance(layer, nn.Conv2d):
-    #             print(i, '/', len(aux_cfg), ':', aux_cfg[i])
-    #             layer.weight = th.nn.Parameter(thm.get(aux_cfg[i]).weight.float())
-    #             layer.bias = th.nn.Parameter(thm.get(aux_cfg[i]).bias.float())
-    #             i += 1
-    #     print('wct load aux torch #convs', len(th_cfg), '-', len(aux_cfg), i)
+        for layer in list(ptm):
+            if isinstance(layer, nn.Conv2d):
+                print(i, '/', len(aux_cfg), ':', aux_cfg[i])
+                layer.weight = nn.Parameter(thm.features[th_cfg[i]].weight.float())
+                layer.bias = nn.Parameter(thm.features[th_cfg[i]].bias.float())
+                i += 1
+        print('wct load aux torch #convs', len(th_cfg), '-', len(aux_cfg), i)
         
 
     def load_model(self, enc_model = 'models/wct/vgg_normalised_conv5_1.t7', dec_model = None):
         if self.flag == 'wct':
             print('load encoder from:', enc_model)
-            vgg = models.vgg16(pretrained=True)
+            vgg = th.hub.load('pytorch/vision', 'vgg16')
+            # vgg.load_state_dict(th.hub.load_state_dict_from_url('https://github.com/wuhuikai/DeepBilateralLearning/releases/download/v0.1/vgg_normalised_conv5_1.t7'))
+            vgg.eval()
             # vgg = load_torch_model(vgg, enc_model)
             self.load_from_torch(self.encs[0], vgg, th_cfg[1]) #conv1
             for i in range(2, self.aux_dep+1):
                 self.load_aux_from_torch(self.encs[i-1], vgg, th_cfg[i-1], th_cfg[i])
             if not self.train_dec and dec_model is not None and dec_model.lower() != 'none':
                 print('load decoder from:', dec_model)
-                vgg = models.vgg16(pretrained=True)
-                # vgg = load_torch_model(vgg, enc_model)
+                vgg = th.hub.load('pytorch/vision', 'vgg16')
+                vgg.load_state_dict(th.hub.load_state_dict_from_url('https://github.com/wuhuikai/DeepBilateralLearning/releases/download/v0.1/vgg_normalised_conv5_1.t7'))
+                vgg.eval()
+                # vgg = load_torch_model(vgg, dec_model)
                 self.load_from_torch(self.dec, vgg, th_dec_cfg[self.dep])
         else:
             print('autoencoder: load: flag not supported', self.flag)
@@ -163,10 +167,6 @@ class autoencoder(nn.Module):
             code = self.encs[i](input)
         out = self.dec(code)
         return out
-
-
-
-
 
 class mask_autoencoder(autoencoder):
     def __init__(self, flag = 'wct', depth_flag = 'E5-E3', mix_flag = 'mask', dropout = 0.5, train_dec=True, st_cfg=[128], cnt_cfg=[128], use_sgm=None, trans_flag='adin', base_dep={4}, blur_flag=False):
