@@ -68,6 +68,17 @@ class autoencoder(nn.Module):
 
 
     import torch.nn as nn
+    
+    def load_from_torch(self, ptm, thm, th_cfg):
+        print(ptm, thm)
+        i = 0
+        for layer in list(ptm):
+            if isinstance(layer, nn.Conv2d):
+                print(i, '/', len(th_cfg), ':', th_cfg[i])
+                layer.weight = th.nn.Parameter(thm.get(th_cfg[i]).weight.float())
+                layer.bias = th.nn.Parameter(thm.get(th_cfg[i]).bias.float())
+                i += 1
+        print('wct load torch #convs', len(th_cfg), i)
 
     def load_aux_from_torch(self, ptm, thm, aux_cfg):
         print(ptm, thm)
@@ -91,22 +102,24 @@ class autoencoder(nn.Module):
         print('wct load torch #convs', len(aux_cfg), i)
 
 
+    ## original not working
 
-    def load_aux_from_torch(self, ptm, thm, th_cfg, aux_cfg):
-        #print ptm, thm
-        assert(len(th_cfg) < len(aux_cfg))
-        i = 0
-        while i < len(th_cfg):
-            assert(th_cfg[i] == aux_cfg[i])
-            i += 1
+    # def load_aux_from_torch(self, ptm, thm, th_cfg, aux_cfg):
+    #     #print ptm, thm
+    #     assert(len(th_cfg) < len(aux_cfg))
+    #     i = 0
+    #     while i < len(th_cfg):
+    #         assert(th_cfg[i] == aux_cfg[i])
+    #         i += 1
 
-        for layer in list(ptm):
-            if isinstance(layer, nn.Conv2d):
-                print(i, '/', len(aux_cfg), ':', aux_cfg[i])
-                layer.weight = th.nn.Parameter(thm.get(aux_cfg[i]).weight.float())
-                layer.bias = th.nn.Parameter(thm.get(aux_cfg[i]).bias.float())
-                i += 1
-        print('wct load aux torch #convs', len(th_cfg), '-', len(aux_cfg), i)
+    #     for layer in list(ptm):
+    #         if isinstance(layer, nn.Conv2d):
+    #             print(i, '/', len(aux_cfg), ':', aux_cfg[i])
+    #             layer.weight = th.nn.Parameter(thm.get(aux_cfg[i]).weight.float())
+    #             layer.bias = th.nn.Parameter(thm.get(aux_cfg[i]).bias.float())
+    #             i += 1
+    #     print('wct load aux torch #convs', len(th_cfg), '-', len(aux_cfg), i)
+        
 
     def load_model(self, enc_model = 'models/wct/vgg_normalised_conv5_1.t7', dec_model = None):
         if self.flag == 'wct':
