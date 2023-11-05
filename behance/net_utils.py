@@ -69,7 +69,7 @@ def make_wct_enc_layers(cfg):
             layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
         else:
             conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=0)
-            layers += [nn.ReflectionPad2d((1,1,1,1)), conv2d, nn.ReLU(inplace=True)]
+            layers += [nn.ReflectionPad2d((2,2,2,2)), conv2d, nn.ReLU(inplace=True)]
             in_channels = v
     return nn.Sequential(*layers)
 
