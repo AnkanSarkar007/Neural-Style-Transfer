@@ -60,9 +60,6 @@ class autoencoder(nn.Module):
             if train_dec:
                 self.dec = make_tr_dec_layers(dec_cfg[self.dep], use_sgm=use_sgm)
                 print('autoencoder init: need decoder training')
-            else:
-                self.dec = make_wct_dec_layers(dec_cfg[self.dep])
-                print('autoencoder init: wct: please load decoder')
         else:
             print('autoencoder: init: flag not supported: ', flag)
 
@@ -115,8 +112,8 @@ class autoencoder(nn.Module):
         for layer in list(ptm):
             if isinstance(layer, nn.Conv2d):
                 print(i, '/', len(aux_cfg), ':', aux_cfg[i])
-                layer.weight = nn.Parameter(thm.features[th_cfg[i]].weight.float())
-                layer.bias = nn.Parameter(thm.features[th_cfg[i]].bias.float())
+                layer.weight = nn.Parameter(thm.features[aux_cfg[i]].weight.float())
+                layer.bias = nn.Parameter(thm.features[aux_cfg[i]].bias.float())
                 i += 1
         print('wct load aux torch #convs', len(th_cfg), '-', len(aux_cfg), i)
         
@@ -124,17 +121,15 @@ class autoencoder(nn.Module):
     def load_model(self, enc_model = 'models/wct/vgg_normalised_conv5_1.t7', dec_model = None):
         if self.flag == 'wct':
             print('load encoder from:', enc_model)
-            vgg = th.hub.load('pytorch/vision', 'vgg16')
-            # vgg.load_state_dict(th.hub.load_state_dict_from_url('https://github.com/wuhuikai/DeepBilateralLearning/releases/download/v0.1/vgg_normalised_conv5_1.t7'))
+            vgg = th.hub.load('pytorch/vision:v0.10.0', 'vgg16')
             vgg.eval()
             # vgg = load_torch_model(vgg, enc_model)
             self.load_from_torch(self.encs[0], vgg, th_cfg[1]) #conv1
             for i in range(2, self.aux_dep+1):
                 self.load_aux_from_torch(self.encs[i-1], vgg, th_cfg[i-1], th_cfg[i])
-            if not self.train_dec and dec_model is not None and dec_model.lower() != 'none':
+            if not self.train_dec and dec_model is not None and dec_model.lower() != 'none': # this will never happen
                 print('load decoder from:', dec_model)
-                vgg = th.hub.load('pytorch/vision', 'vgg16')
-                vgg.load_state_dict(th.hub.load_state_dict_from_url('https://github.com/wuhuikai/DeepBilateralLearning/releases/download/v0.1/vgg_normalised_conv5_1.t7'))
+                vgg = th.hub.load('pytorch/vision:v0.10.0', 'vgg16')
                 vgg.eval()
                 # vgg = load_torch_model(vgg, dec_model)
                 self.load_from_torch(self.dec, vgg, th_dec_cfg[self.dep])
