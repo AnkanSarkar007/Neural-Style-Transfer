@@ -89,7 +89,7 @@ if args.test_dp:
 if args.diag_flag is not None and args.diag_flag == 'batch': #batch testing of results
     #load data
     transform_test = transforms.Compose([
-        transforms.Scale(224),
+        transforms.Resize(224),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         ])
@@ -112,7 +112,7 @@ if args.diag_flag is not None and args.diag_flag == 'batch': #batch testing of r
         l=labels[0]
         if use_cuda:
             inputs, labels = inputs.to('cuda'), labels.to('cuda')
-        inputs,labels = Variable(inputs,volatile=True), Variable(labels,volatile=True)
+        # inputs,labels = Variable(inputs,volatile=True), Variable(labels,volatile=True)
         for bj,(st_inputs,st_labels) in enumerate(st_loader): #iter all content test, random select same number of style images
             #if l == st_labels[0]:  #same folder
             #    save_folder = '%s/%s'%(args.save_image, cnt_set.classes[l])
@@ -124,10 +124,11 @@ if args.diag_flag is not None and args.diag_flag == 'batch': #batch testing of r
                     os.chmod(save_folder, 0o777)
                 if use_cuda:
                     st_inputs, st_labels = st_inputs.to('cuda'), st_labels.to('cuda')
-                st_inputs,st_labels = Variable(st_inputs,volatile=True), Variable(st_labels,volatile=True)
+                # st_inputs,st_labels = Variable(st_inputs,volatile=True), Variable(st_labels,volatile=True)
 
                 #forward pass
-                img12,_,_,mask = ae(inputs, st_inputs)
+                with th.no_grad():
+                    img12,_,_,mask = ae(inputs, st_inputs)
 
                 mm = th.mean(mask, dim=1, keepdim=True) #get mean
                 mstd = th.mean(mask, dim=1, keepdim=True) #get mean
