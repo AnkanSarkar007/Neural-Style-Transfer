@@ -129,9 +129,9 @@ class autoencoder(nn.Module):
                 self.load_aux_from_torch(self.encs[i-1], vgg, th_cfg[i-1], th_cfg[i])
             if not self.train_dec and dec_model is not None and dec_model.lower() != 'none': # this will never happen
                 print('load decoder from:', dec_model)
-                vgg = th.hub.load('pytorch/vision:v0.10.0', 'vgg16')
+                # vgg = th.hub.load('pytorch/vision:v0.10.0', 'vgg16')
+                vgg = load_torch_model(vgg, dec_model)
                 vgg.eval()
-                # vgg = load_torch_model(vgg, dec_model)
                 self.load_from_torch(self.dec, vgg, th_dec_cfg[self.dep])
         else:
             print('autoencoder: load: flag not supported', self.flag)

@@ -165,7 +165,7 @@ class ae_gan(nn.Module):  #combine generator, discriminator and loss to parallel
         if args.cla_w > 0:
             criterion.add_ce(sc_out12, st_labels, args.cla_w) #style of syth
             criterion.add_ce(sc_out2, st_labels, args.cla_w) #style of input real
-            running_dcl += sum([x.data[0] for x in criterion.ls[:2]])
+            running_dcl += sum(criterion.ls[:2])
 
         if args.gan_w > 0:
             if use_real:
@@ -174,7 +174,7 @@ class ae_gan(nn.Module):  #combine generator, discriminator and loss to parallel
             else:                    #flip label for stable training
                 criterion.add_gan_real(bc_out12, args.gan_w)
                 criterion.add_gan_fake(bc_out2, args.gan_w)
-            running_dbl += sum([x.data[0] for x in criterion.ls[-2:]])
+            running_dbl += sum(criterion.ls[-2:])
 
         #backward and update
         if criterion.pls is not None and len(criterion.pls) > 0 :
@@ -338,7 +338,7 @@ def train(epoch):
             loss, running_dcl, running_dbl = wrap_net.module.train_disc(inputs, labels, st_inputs, st_labels, args, running_dcl, running_dbl, use_real=use_real)
         else:
             loss, running_dcl, running_dbl = wrap_net.train_disc(inputs, labels, st_inputs, st_labels, args, running_dcl, running_dbl, use_real=use_real)
-        if loss is not None and len(loss) > 0:
+        if loss is not None:
             loss.backward()
             if args.optm == 'padam':
                 doptimizer.pred_step()  #predition step
@@ -347,9 +347,9 @@ def train(epoch):
         if bi % args.print_freq == 1:
             print(('training epoch: %d, minibatch: %d, dis class loss: %.3f, dis binary loss: %.3f'%(epoch, bi, running_dcl/(bi+1), running_dbl/(bi+1))))
             if len(gids) > 1:
-                print(('ep%d mb%d, discriminator loss details: '%(epoch, bi), [x.data[0] for x in wrap_net.module.criterion.ls]))
+                print(('ep%d mb%d, discriminator loss details: '%(epoch, bi), wrap_net.module.criterion.ls))
             else:
-                print(('ep%d mb%d, discriminator loss details: '%(epoch, bi), [x.data[0] for x in wrap_net.criterion.ls]))
+                print(('ep%d mb%d, discriminator loss details: '%(epoch, bi), wrap_net.criterion.ls))
 
 
         ##################################update generator =======================
@@ -367,10 +367,10 @@ def train(epoch):
             sumloss = sum(loss)
             if len(gids) > 1:
                 sumloss.backward(th.ones(len(gids)))
-                running_loss += th.sum(sumloss).data[0]
+                running_loss += th.sum(sumloss)
             else:
                 sumloss.backward()
-                running_loss += sumloss.data[0]
+                running_loss += sumloss
 
             optimizer.step()
 
@@ -381,7 +381,7 @@ def train(epoch):
             print(('training epoch: %d, minibatch: %d, loss: %f,  total time/mb: %f ms, running time/mb: %f ms'%(
                     epoch, bi, running_loss/(bi+1),
                     running_time/(bi+1)*1000.0, (running_time-loading_time)/(bi+1)*1000.0)))
-            print(('ep%d mb%d generator loss details: '%(epoch, bi), [x.data[0] for x in loss]))
+            print(('ep%d mb%d generator loss details: '%(epoch, bi), loss))
             #save intermdiate results for examining
             tmp = inputs.data[0].clamp_(0, 1)
             imsave(tmp, '%s/train/e%d_b%d_%d.jpg'%(debug_folder, epoch, bi, 1))
@@ -413,12 +413,11 @@ def test(epoch):
         if use_cuda:
             inputs, labels = inputs.to('cuda'), labels.to('cuda')
             st_inputs, st_labels = st_inputs.to('cuda'), st_labels.to('cuda')
-        inputs,labels = Variable(inputs,volatile=True), Variable(labels,volatile=True)
-        st_inputs,st_labels = Variable(st_inputs,volatile=True), Variable(st_labels,volatile=True)
         loading_time += time.time() - end
 
         #forward pass
-        _,img12 = wrap_net(inputs, labels, st_inputs, st_labels, args)
+        with th.no_grad():
+            _,img12 = wrap_net(inputs, labels, st_inputs, st_labels, args)
 
         running_time += time.time() - end
         end = time.time()
