@@ -1,3 +1,5 @@
 *pycache*
-# behance/data
+behance/data
 behance/output
+behance/debug_gan
+behance/models
