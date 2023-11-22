@@ -127,8 +127,8 @@ if args.diag_flag is not None and args.diag_flag == 'batch': #batch testing of r
                 # st_inputs,st_labels = Variable(st_inputs,volatile=True), Variable(st_labels,volatile=True)
 
                 #forward pass
-                with th.no_grad():
-                    img12,_,_,mask = ae(inputs, st_inputs)
+                # with th.no_grad():
+                img12,_,_,mask = ae(inputs, st_inputs)
 
                 mm = th.mean(mask, dim=1, keepdim=True) #get mean
                 mstd = th.mean(mask, dim=1, keepdim=True) #get mean

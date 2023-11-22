@@ -416,8 +416,8 @@ def test(epoch):
         loading_time += time.time() - end
 
         #forward pass
-        with th.no_grad():
-            _,img12 = wrap_net(inputs, labels, st_inputs, st_labels, args)
+        # with th.no_grad():
+        _,img12 = wrap_net(inputs, labels, st_inputs, st_labels, args)
 
         running_time += time.time() - end
         end = time.time()
