@@ -28,6 +28,7 @@ from datetime import datetime
 import shutil
 import functools
 
+# Descriminator Class. Initialised with zero weights. Layers as decribed in the code.
 class PatchDiscriminator(nn.Module):
     def __init__(self, scn, ccn, input_nc=3, ndf=64, n_layers=3, norm_layer=nn.BatchNorm2d, use_sigmoid=False, use_proj=True, use_cnt=False):
         super(PatchDiscriminator, self).__init__()
@@ -87,6 +88,7 @@ class PatchDiscriminator(nn.Module):
             sequence = [nn.Linear(512*3*3, ccn)]
             self.cclass = nn.Sequential(*sequence)
 
+    # forward pass on Discriminator
     def forward(self, indata, slabel = None, clabel = None):
         ftr = self.model(indata)
         bc_out = self.bclass(ftr)   #True/False

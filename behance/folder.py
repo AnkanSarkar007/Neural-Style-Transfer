@@ -27,7 +27,7 @@ def is_image_file(filename):
     filename_lower = filename.lower()
     return any(filename_lower.endswith(ext) for ext in IMG_EXTENSIONS)
 
-
+# searches for folder classes in the content and style folder path provided
 def find_classes(dir):
     classes = [d for d in os.listdir(dir) if os.path.isdir(os.path.join(dir, d))]
     classes.sort()

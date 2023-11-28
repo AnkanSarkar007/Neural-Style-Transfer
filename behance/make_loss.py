@@ -54,6 +54,7 @@ class gan_style_loss(nn.Module):
         self.ls = []
         self.pls = []  #parallel loss
 
+    # MSE loss
     def add_mse(self, input, target, weight=1.0):
         l = weight*self.mse(input, target)
         if self.use_p:
@@ -61,6 +62,7 @@ class gan_style_loss(nn.Module):
         else:
             self.ls.append(l)
 
+    # L1 loss
     def add_l1(self, input, target, weight=1.0):
         l = weight*self.l1(input, target)
         if self.use_p:
@@ -68,10 +70,12 @@ class gan_style_loss(nn.Module):
         else:
             self.ls.append(l)
 
+    # Cross-Entropy Loss
     def add_ce(self, input, target, weight=1.0):
         l = weight*self.ce(input, target)
         self.ls.append(l)
 
+    # Getting the label of style image
     def get_real_lbl_var(self, indata):
         if self.real_lbl_var is None or (self.real_lbl_var.numel() != indata.numel()):
             self.real_lbl_var = th.FloatTensor(indata.size()).fill_(self.real_lbl)
@@ -79,6 +83,7 @@ class gan_style_loss(nn.Module):
                 self.real_lbl_var = self.real_lbl_var.cuda()
             self.real_lbl_var = Variable(self.real_lbl_var, requires_grad=False)
 
+    # Getting the label of reconstructed image
     def get_fake_lbl_var(self, indata):
         if self.fake_lbl_var is None or (self.fake_lbl_var.numel() != indata.numel()):
             self.fake_lbl_var = th.FloatTensor(indata.size()).fill_(self.fake_lbl)
@@ -86,11 +91,13 @@ class gan_style_loss(nn.Module):
                 self.fake_lbl_var = self.fake_lbl_var.cuda()
             self.fake_lbl_var = Variable(self.fake_lbl_var, requires_grad=False)
 
+    # 
     def add_gan_real(self, input, weight=1.0):
         self.get_real_lbl_var(input)
         l = weight*self.bce(input, self.real_lbl_var)
         self.ls.append(l)
 
+    # 
     def add_gan_fake(self, input, weight=1.0):
         self.get_fake_lbl_var(input)
         l = weight*self.bce(input, self.fake_lbl_var)

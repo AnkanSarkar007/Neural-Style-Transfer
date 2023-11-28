@@ -45,6 +45,7 @@ import shutil
 import math
 import random
 
+# command line arguments
 args = utils.get_autoencoder_args()
 print(('%s_%s'%(args.dataset, args.ae_flag)))
 print((datetime.now(), args, '\n============================'))
@@ -55,15 +56,17 @@ tag='gan-mask_%s_%s_%d_%s_%s_%s_%s_c%.3f_a%.3f_p%.3f_g%.3f_cw%.3f_%s%.4f_%s%.4f_
         args.g_optm, args.lr, args.optm, args.d_lr, args.pred_gm, args.weight_decay, args.dropout,  args.epochs, args.lr_freq, args.batch_size, args.test_batch_size, args.gan_ratio, args.gr_freq,
         args.st_layers, args.cnt_layers, args.dec_last, args.base_mode)
 
-
+# saving the model
 def get_save_file(args):
     best_file1 = '%s/%s'%(args.save_model, tag)
     return best_file1
 
+# debug folder
 def get_debug_folder(args):
     best_file1 = '%s/%s'%(args.save_run, tag)
     return best_file1
 
+# acquiring the gpu for training purpose
 use_cuda = not args.use_cpu
 random.seed(args.seed)
 th.manual_seed(args.seed)
@@ -108,7 +111,8 @@ def unfreeze_generator(tmp):
             p.requires_grad = True  #not update generator
 
 
-class ae_gan(nn.Module):  #combine generator, discriminator and loss to parallel
+# combine generator, discriminator and loss to parallel. The main class which performs the trraining on the given dataset
+class ae_gan(nn.Module): 
 
     def __init__(self, args):
         super(ae_gan, self).__init__()
@@ -143,6 +147,7 @@ class ae_gan(nn.Module):  #combine generator, discriminator and loss to parallel
         self.dnet = dnet
         self.criterion = criterion
 
+    # training the discriminator
     def train_disc(self, inputs, labels, st_inputs, st_labels, args, running_dcl, running_dbl, use_real):
         net = self.net
         dnet = self.dnet
@@ -392,6 +397,7 @@ def train(epoch):
 
     return running_loss/len(cnt_trainloader), running_time, loading_time, running_dcl/len(cnt_trainloader), running_dbl/len(cnt_trainloader)
 
+# validation
 def test(epoch):
     wrap_net.eval()
     running_time = 0.0
@@ -416,7 +422,6 @@ def test(epoch):
         loading_time += time.time() - end
 
         #forward pass
-        # with th.no_grad():
         _,img12 = wrap_net(inputs, labels, st_inputs, st_labels, args)
 
         running_time += time.time() - end
