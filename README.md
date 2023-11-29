@@ -20,6 +20,7 @@ This project implements neural style transfer using a mask-guided autoencoder. T
 3. [Testing](#testing)
 4. [Presentation](#presentation)
 5. [Description of python files](#description)
+6. [Sample Output](#output)
 
 ## Dependencies
 
@@ -52,7 +53,7 @@ python3 test_autoencoder.py  --content-data  data/test/content --style-data data
 
 - [Canva Presentation](https://www.canva.com/design/DAF0r_NG1NE/MkldKMbGKtw5gfjM4HkqIg/edit)
 
-## Description of files
+## Description
 
 ### [`folder.py`](behance/folder.py) and [`load_data.py`](behance/load_data.py)
 
@@ -92,4 +93,25 @@ Loads the specified model and generates neural-style-transferred images for each
 
 Code comments are thoughtfully placed throughout the files for enhanced understanding.
 
-For sample output, see [`behance\output`](behance/output/)
+## Output
+
+<div style="display:flex;">
+    <img src="behance/output/face_face/c0_s0_1.jpg" alt="Image 1" style="width:33%;">
+    <img src="behance/output/face_face/c0_s0_2.jpg" alt="Image 2" style="width:33%;">
+    <img src="behance/output/face_face/c0_s0_12.jpg" alt="Image 3" style="width:33%;">
+</div>
+<br>
+<div style="display:flex;">
+    <img src="behance/output/face_face/c2_s3_1.jpg" alt="Image 1" style="width:33%;">
+    <img src="behance/output/face_face/c2_s3_2.jpg" alt="Image 2" style="width:33%;">
+    <img src="behance/output/face_face/c2_s3_12.jpg" alt="Image 3" style="width:33%;">
+</div>
+<br>
+<div style="display:flex;">
+    <img src="behance/output/content-images_face/c3_s2_1.jpg" alt="Image 1" style="width:33%;">
+    <img src="behance/output/content-images_face/c3_s2_2.jpg" alt="Image 2" style="width:33%;">
+    <img src="behance/output/content-images_face/c3_s2_12.jpg" alt="Image 3" style="width:33%;">
+</div>
+<br>
+
+For more outputs, see [`behance\output`](behance/output/)
