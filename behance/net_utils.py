@@ -28,7 +28,7 @@ import time
 from datetime import datetime
 import shutil
 
-
+#encoder
 cfg = {
         5: [64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512],#vgg19, block 5, 14 cnvs
         4: [64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512],#vgg19, block 4
@@ -36,6 +36,8 @@ cfg = {
         2: [64, 'M', 128],#vgg19, block 2
         1: [64],#vgg19, block 1
         }
+
+#decoder
 dec_cfg = {
         5: [512, 'M', 512, 512, 512, 'M', 256, 256, 256, 'M', 128, 128, 'M', 64],
         4: [512, 'M', 256, 256, 256, 'M', 128, 128, 'M', 64],

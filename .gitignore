@@ -1,5 +1,4 @@
 *pycache*
-# behance/data
 behance/debug_gan
 behance/models
 *.jpg
@@ -12,5 +11,6 @@ wikiart_csv.zip
 2.py
 archive
 archive (1)
-test
-.gitignore
+*test
+*.gitignore
+*wikiart
